@@ -23,6 +23,9 @@ import {
   AlignLeftIcon,
   ListIcon,
   ListOrderedIcon,
+  MinusIcon,
+  PlusIcon,
+  ListCollapse,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEditorStore } from '@/store/use-editor-store';
@@ -46,6 +49,138 @@ import { Button } from '@/components/ui/button';
 import { type Level } from '@tiptap/extension-heading';
 import { type ColorResult, ChromePicker } from 'react-color';
 import { useState } from 'react';
+
+const LineHeightButton = () => {
+  const { editor } = useEditorStore();
+  const lineHeights = [
+    {
+      label: 'Default',
+      value: 'normal',
+    },
+    {
+      label: 'Single',
+      value: '1',
+    },
+    {
+      label: '1.15',
+      value: '1.15',
+    },
+    {
+      label: '1.5',
+      value: '1.5',
+    },
+    {
+      label: '2',
+      value: '2',
+    },
+  ];
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className='h-7 min-w-7 flex flex-col shrink-0 items-center justify-center rounded-sm hover:bg-neutral-200/80 px-1.5 overflow-hidden text-sm'>
+          <ListCollapse className='size-4' />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className='p-1 flex flex-col gap-y-1'>
+        {lineHeights.map(({ label, value }) => (
+          <button
+            key={value}
+            onClick={() => editor?.chain().focus().setLineHeight(value).run()}
+            className={cn(
+              'flex items-center gap-x-2 px-2 py-1 rounded-sm hover:bg-neutral-200/80',
+              editor?.getAttributes('paragraph').lineHeight === value &&
+                'bg-neutral-200/80'
+            )}
+          >
+            <span className='text-sm'>{label}</span>
+          </button>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+const FontSizeButton = () => {
+  const { editor } = useEditorStore();
+  const currentFontSize = editor?.getAttributes('textStyle').fontSize
+    ? editor?.getAttributes('textStyle').fontSize.replace('px', '')
+    : '16';
+
+  const [fontSize, setFontSize] = useState(currentFontSize);
+  const [inputValue, setInputValue] = useState(fontSize);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const updateFontSize = (newSize: string) => {
+    const size = parseInt(newSize);
+    if (!isNaN(size) && size > 0) {
+      editor?.chain().focus().setFontSize(`${size}px`).run();
+      setFontSize(newSize);
+      setInputValue(newSize);
+      setIsEditing(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+  const handleInputBlur = () => {
+    updateFontSize(inputValue);
+  };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      updateFontSize(inputValue);
+      editor?.commands.focus();
+    }
+  };
+  const increment = () => {
+    const newSize = parseInt(fontSize) + 1;
+    updateFontSize(newSize.toString());
+  };
+  const decrement = () => {
+    const newSize = parseInt(fontSize) - 1;
+    if (newSize > 0) {
+      updateFontSize(newSize.toString());
+    }
+  };
+
+  return (
+    <div className='flex ic gap-x-0.5'>
+      <button
+        onClick={decrement}
+        className='h-7 w-7 flex shrink-0 items-center justify-center rounded-sm hover:bg-neutral-200/80'
+      >
+        <MinusIcon className='size-4' />
+      </button>
+      {isEditing ? (
+        <input
+          type='text'
+          value={inputValue}
+          onChange={handleInputChange}
+          onBlur={handleInputBlur}
+          onKeyDown={handleKeyDown}
+          className='h-7 w-10 text-sm text-center border rounded-sm border-neutral-400/80 bg-transparent  focus:outline-none focus:ring-0'
+        />
+      ) : (
+        <button
+          onClick={() => {
+            setIsEditing(true);
+            setFontSize(currentFontSize);
+          }}
+          className='h-7 w-10 text-sm text-center rounded-sm border  border-neutral-400 bg-transparent cursor-text hover:bg-neutral-200/80'
+        >
+          {currentFontSize}
+        </button>
+      )}
+      <button
+        onClick={increment}
+        className='h-7 w-7 flex shrink-0 items-center justify-center rounded-sm hover:bg-neutral-200/80'
+      >
+        <PlusIcon className='size-4' />
+      </button>
+    </div>
+  );
+};
 
 const ImageButton = () => {
   const { editor } = useEditorStore();
@@ -109,7 +244,8 @@ const ImageButton = () => {
                 handleImageUrlSubmit();
               }
             }}
-          />{' '}
+          />
+          ChromePicker
           <DialogFooter>
             <Button onClick={handleImageUrlSubmit}>Insert</Button>
           </DialogFooter>
@@ -181,7 +317,7 @@ const AlignButton = () => {
           <AlignLeftIcon className='size-4' />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className=' pt-1'>
+      <DropdownMenuContent className='p-1 flex flex-col gap-y-1'>
         {alignments.map(({ label, value, icon: Icon }) => (
           <button
             key={value}
@@ -527,7 +663,7 @@ const Toolbar = () => {
       <Separator orientation='vertical' className='h-6 bg-neutral-300' />
       <HeadingLevelButton />
       <Separator orientation='vertical' className='h-6 bg-neutral-300' />
-      {/* TODO font size */}
+      <FontSizeButton />
       <Separator orientation='vertical' className='h-6 bg-neutral-300' />
       {sections[1].map((item) => (
         <ToolbarButton key={item.label} {...item} />
@@ -537,9 +673,9 @@ const Toolbar = () => {
       <Separator orientation='vertical' className='h-6 bg-neutral-300' />
       <LinkButton />
       <ImageButton />
-      <AlignButton />/
+      <AlignButton />
+      <LineHeightButton />
       <ListButton />
-      {/* TODO line ht */}
       {sections[2].map((item) => (
         <ToolbarButton key={item.label} {...item} />
       ))}

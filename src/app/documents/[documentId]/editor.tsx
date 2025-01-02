@@ -1,5 +1,8 @@
 'use client';
 import { useEditorStore } from '@/store/use-editor-store';
+import { FontSizeExtension } from '@/extensions/font-size';
+import { LineHeightExtension } from '@/extensions/line-height';
+
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TaskItem from '@tiptap/extension-task-item';
@@ -78,6 +81,12 @@ const Editor = () => {
       }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
+      }),
+
+      FontSizeExtension,
+      LineHeightExtension.configure({
+        types: ['heading', 'paragraph'],
+        defaultLineHeight: 'normal',
       }),
     ],
 
