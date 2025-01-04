@@ -15,6 +15,7 @@ import { api } from '../../convex/_generated/api';
 import { useState } from 'react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
+import { toast } from 'sonner';
 
 interface RenameDialogProps {
   documentId: Id<'documents'>;
@@ -40,6 +41,7 @@ const RemoveDialog = ({
       title: title.trim() || 'Untitled document',
     })
       .then(() => setOpen(false))
+      .catch(() => toast.error('Something went wrong. Please try again.'))
       .finally(() => {
         setIsUpdating(false);
       });

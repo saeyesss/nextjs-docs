@@ -28,7 +28,7 @@ const DocumentRow = ({ document }: DocumentRowProps) => {
         ) : (
           <CircleUserIcon className='size-4' />
         )}
-        {document.organizationId ? 'Organization' : 'Not shared'}
+        {document.organizationId ? 'Shared' : 'Not shared'}
       </TableCell>
       <TableCell className='text-muted-foreground hidden md:table-cell'>
         {format(new Date(document._creationTime), 'MMM dd, yyyy')}
