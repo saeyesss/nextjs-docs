@@ -63,7 +63,7 @@ export const create = mutation({
     const organizationId = (user.organization_id ?? undefined) as
       | string
       | undefined;
-      
+
     return await ctx.db.insert('documents', {
       title: args.title ?? 'Untitled document',
       ownerId: user.subject,
@@ -77,23 +77,23 @@ export const removeById = mutation({
   args: { id: v.id('documents') },
   handler: async (ctx, args) => {
     const user = await ctx.auth.getUserIdentity();
-    s
     if (!user) {
       throw new ConvexError('Unauthorized');
     }
-    
+
     const organizationId = (user.organization_id ?? undefined) as
-    | string
-    | undefined;
-    
-    
+      | string
+      | undefined;
+
     const document = await ctx.db.get(args.id);
 
     if (!document) {
       throw new ConvexError('Document not found');
     }
     const isOwner = document.ownerId === user.subject;
-    const isOrganizationMember = document.organizationId === organizationId;
+    const isOrganizationMember = !!(
+      document.organizationId && document.organizationId === organizationId
+    );
     if (!isOwner && !isOrganizationMember) {
       throw new ConvexError('Unauthorized');
     }
@@ -108,15 +108,30 @@ export const updateById = mutation({
     if (!user) {
       throw new ConvexError('Unauthorized');
     }
+
+    const organizationId = (user.organization_id ?? undefined) as
+      | string
+      | undefined;
+
     const document = await ctx.db.get(args.id);
 
     if (!document) {
       throw new ConvexError('Document not found');
     }
     const isOwner = document.ownerId === user.subject;
-    if (!isOwner) {
+    const isOrganizationMember = !!(
+      document.organizationId && document.organizationId === organizationId
+    );
+    if (!isOwner && !isOrganizationMember) {
       throw new ConvexError('Unauthorized');
     }
     return await ctx.db.patch(args.id, { title: args.title });
+  },
+});
+
+export const getById = query({
+  args: { id: v.id('documents') },
+  handler: async (ctx, { id }) => {
+    return await ctx.db.get(id);
   },
 });
