@@ -33,14 +33,39 @@ import {
 } from 'lucide-react';
 import { BsFilePdf } from 'react-icons/bs';
 
-import DocumentInput from '../document-input';
+import DocumentInput from './document-input';
 import { useEditorStore } from '@/store/use-editor-store';
 import { OrganizationSwitcher, UserButton } from '@clerk/nextjs';
 import { Avatars } from './avatars';
 import Inbox from './inbox';
+import { Doc } from '../../../../convex/_generated/dataModel';
+import { useMutation } from 'convex/react';
+import { useRouter } from 'next/navigation';
+import { api } from '../../../../convex/_generated/api';
+import { toast } from 'sonner';
+import RemoveDialog from '@/components/remove-dialog';
+import RenameDialog from '@/components/rename-dialog';
 
-const Navbar = () => {
+interface NavbarProps {
+  data: Doc<'documents'>;
+}
+
+const Navbar = ({ data }: NavbarProps) => {
   const { editor } = useEditorStore();
+  const router = useRouter();
+  const mutation = useMutation(api.documents.create);
+
+  const onNewDocument = () => {
+    mutation({
+      title: 'Untitled document',
+      initialContent: '',
+    })
+      .then((id) => {
+        router.push(`/documents/${id}`);
+      })
+      .catch(() => toast.error('Something went wrong. Please try again'));
+  };
+
   const insertTable = ({ rows, cols }: { rows: number; cols: number }) => {
     editor
       ?.chain()
@@ -63,7 +88,7 @@ const Navbar = () => {
     const blob = new Blob([JSON.stringify(content)], {
       type: 'application/json',
     });
-    onDownload(blob, `Untitled.json`); // TODO add document title
+    onDownload(blob, `${data.title}.json`);
   };
   const onSaveHTML = () => {
     if (!editor) return;
@@ -71,7 +96,7 @@ const Navbar = () => {
     const blob = new Blob([content], {
       type: 'text/html',
     });
-    onDownload(blob, `Untitled.html`); // TODO add document title
+    onDownload(blob, `${data.title}.html`);
   };
   const onSaveText = () => {
     if (!editor) return;
@@ -79,7 +104,7 @@ const Navbar = () => {
     const blob = new Blob([content], {
       type: 'text/plain',
     });
-    onDownload(blob, `Untitled.txt`); // TODO add document title
+    onDownload(blob, `${data.title}.txt`);
   };
   return (
     <nav className='flex items-center justify-between'>
@@ -88,7 +113,7 @@ const Navbar = () => {
           <Image src={'/logo.svg'} alt='logo' width={36} height={36} />
         </Link>
         <div className='flex flex-col'>
-          <DocumentInput />
+          <DocumentInput title={data.title} id={data._id} />
           <div className='flex'>
             <Menubar className='border-none bg-transparent shadow-none h-auto p-0'>
               <MenubarMenu>
@@ -120,19 +145,30 @@ const Navbar = () => {
                       </MenubarItem>
                     </MenubarSubContent>
                   </MenubarSub>
-                  <MenubarItem>
+                  <MenubarItem onClick={onNewDocument}>
                     <FilePlus className='size-4 mr-2' />
                     New Document
                   </MenubarItem>
                   <MenubarSeparator />
-                  <MenubarItem>
-                    <FilePenIcon className='size-4 mr-2' />
-                    Rename
-                  </MenubarItem>
-                  <MenubarItem>
-                    <Trash2Icon className='size-4 mr-2' />
-                    Delete
-                  </MenubarItem>
+
+                  <RenameDialog documentId={data._id} initialTitle={data.title}>
+                    <MenubarItem
+                      onClick={(e) => e.stopPropagation()}
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      <FilePenIcon className='size-4 mr-2' />
+                      Rename
+                    </MenubarItem>
+                  </RenameDialog>
+                  <RemoveDialog documentId={data._id}>
+                    <MenubarItem
+                      onClick={(e) => e.stopPropagation()}
+                      onSelect={(e) => e.preventDefault()}
+                    >
+                      <Trash2Icon className='size-4 mr-2' />
+                      Delete
+                    </MenubarItem>
+                  </RemoveDialog>
                   <MenubarSeparator />
                   <MenubarItem onClick={() => window.print()}>
                     <PrinterIcon className='size-4 mr-2' />

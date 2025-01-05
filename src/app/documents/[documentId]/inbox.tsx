@@ -1,6 +1,6 @@
 'use client';
 
-import { ClientSideSuspense } from '@liveblocks/react';
+import { ClientSideSuspense } from '@liveblocks/react/suspense';
 import { useInboxNotifications } from '@liveblocks/react/suspense';
 import { InboxNotification, InboxNotificationList } from '@liveblocks/react-ui';
 import { BellIcon } from 'lucide-react';
