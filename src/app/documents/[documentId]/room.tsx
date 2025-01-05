@@ -11,8 +11,9 @@ import Loader from '@/components/loader';
 import { getUsers, getDocuments } from './actions';
 import { toast } from 'sonner';
 import { Id } from '../../../../convex/_generated/dataModel';
+import { DEFAULT_LEFT_MARGIN, DEFAULT_RIGHT_MARGIN } from '@/constants/margins';
 
-type User = { id: string; name: string; avatar: string };
+type User = { id: string; name: string; avatar: string; color: string };
 
 export function Room({ children }: { children: ReactNode }) {
   const params = useParams();
@@ -68,7 +69,10 @@ export function Room({ children }: { children: ReactNode }) {
     >
       <RoomProvider
         id={params.documentId as string}
-        initialStorage={{ leftMargin: 56, rightMargin: 56 }}
+        initialStorage={{
+          leftMargin: DEFAULT_LEFT_MARGIN,
+          rightMargin: DEFAULT_RIGHT_MARGIN,
+        }}
       >
         <ClientSideSuspense fallback={<Loader label='Loading room...' />}>
           {children}

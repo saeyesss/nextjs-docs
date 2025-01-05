@@ -24,11 +24,23 @@ import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
 import { useLiveblocksExtension } from '@liveblocks/react-tiptap';
 import { useStorage } from '@liveblocks/react/suspense';
+import { DEFAULT_LEFT_MARGIN, DEFAULT_RIGHT_MARGIN } from '@/constants/margins';
 
-const Editor = () => {
-  const leftMargin = useStorage((root) => root.leftMargin);
-  const rightMargin = useStorage((root) => root.rightMargin);
-  const liveblocks = useLiveblocksExtension();
+interface EditorProps {
+  initialContent?: string | undefined;
+}
+
+const Editor = ({ initialContent }: EditorProps) => {
+  const leftMargin = useStorage(
+    (root) => root.leftMargin ?? DEFAULT_LEFT_MARGIN
+  );
+  const rightMargin = useStorage(
+    (root) => root.rightMargin ?? DEFAULT_RIGHT_MARGIN
+  );
+  const liveblocks = useLiveblocksExtension({
+    initialContent,
+    offlineSupport_experimental: true,
+  });
   const { setEditor } = useEditorStore();
   const editor = useEditor({
     immediatelyRender: false,
@@ -58,7 +70,7 @@ const Editor = () => {
     },
     editorProps: {
       attributes: {
-        style: `padding-left: ${leftMargin ?? 56}px; padding-right: ${rightMargin ?? 56}px`,
+        style: `padding-left: ${leftMargin}px; padding-right: ${rightMargin}px`,
         class:
           'focus:outline-none bg-white border border-[#C7C7C7] flex flex-col min-h-[1054px] w-[816px] print:border-0 pt-10 pr-14 pb-10 cursor-text ',
       },

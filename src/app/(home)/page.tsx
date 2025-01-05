@@ -5,7 +5,6 @@ import { usePaginatedQuery } from 'convex/react';
 import Navbar from './navbar';
 import TemplateGallery from './template-gallery';
 import { api } from '../../../convex/_generated/api';
-import Loader from '@/components/loader';
 import DocumentsTable from './documents-table';
 import { useSearchParam } from '@/hooks/use-search-param';
 

@@ -1,3 +1,4 @@
+import { DEFAULT_LEFT_MARGIN, DEFAULT_RIGHT_MARGIN } from '@/constants/margins';
 import { useStorage, useMutation } from '@liveblocks/react/suspense';
 import { useRef, useState } from 'react';
 import { FaCaretDown } from 'react-icons/fa';
@@ -5,8 +6,10 @@ import { FaCaretDown } from 'react-icons/fa';
 const markers = Array.from({ length: 83 }, (_, i) => i);
 
 const Ruler = () => {
-  const leftMargin = useStorage((root) => root.leftMargin) ?? 56;
-  const rightMargin = useStorage((root) => root.rightMargin) ?? 56;
+  const leftMargin =
+    useStorage((root) => root.leftMargin) ?? DEFAULT_LEFT_MARGIN;
+  const rightMargin =
+    useStorage((root) => root.rightMargin) ?? DEFAULT_RIGHT_MARGIN;
   const setLeftMargin = useMutation(({ storage }, position: number) => {
     storage.set('leftMargin', position);
   }, []);
@@ -35,7 +38,7 @@ const Ruler = () => {
         if (isDraggingLeft) {
           const maxLeftPosition = 816 - rightMargin - 100;
           const newLeftPosition = Math.min(rawPosition, maxLeftPosition);
-          setLeftMargin(newLeftPosition); 
+          setLeftMargin(newLeftPosition);
         } else if (isDraggingRight) {
           const maxRightPosition = 816 - (leftMargin + 100);
           const newRightPosition = Math.max(816 - rawPosition, 0);
@@ -50,10 +53,10 @@ const Ruler = () => {
   };
 
   const handleLeftDoubleClick = () => {
-    setLeftMargin(56);
+    setLeftMargin(DEFAULT_LEFT_MARGIN);
   };
   const handleRightDoubleClick = () => {
-    setRightMargin(56);
+    setRightMargin(DEFAULT_RIGHT_MARGIN);
   };
 
   const onMouseUp = () => {

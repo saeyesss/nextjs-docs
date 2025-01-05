@@ -36,7 +36,7 @@ const DocumentInput = ({ title, id }: DocumentInputProps) => {
     e.preventDefault();
     setIsPending(true);
     mutate({ id, title: value })
-  ``    .then(() => {
+      .then(() => {
         setIsEditing(false);
       })
       .catch(() => {
